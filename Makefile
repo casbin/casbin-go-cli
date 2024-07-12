@@ -11,8 +11,3 @@ benchmark:
 
 lint:
 	golangci-lint run --verbose
-
-release:
-	yarn global add semantic-release@17.2.4
-	semantic-release
-
