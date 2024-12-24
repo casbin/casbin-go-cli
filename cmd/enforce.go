@@ -15,13 +15,20 @@
 package cmd
 
 import (
+	"encoding/json"
+
 	"github.com/casbin/casbin/v2"
 	"github.com/spf13/cobra"
 )
 
+type ResponseBody struct {
+	Allow   bool     `json:"allow"`
+	Explain []string `json:"explain"`
+}
+
 // enforceCmd represents the enforce command.
 var enforceCmd = &cobra.Command{
-	Use:   "enforce <subject> <object> <action>",
+	Use:   "enforceEx",
 	Short: "Test if a 'subject' can access a 'object' with a given 'action' based on the policy",
 	Long:  `Test if a 'subject' can access a 'object' with a given 'action' based on the policy`,
 	Args:  cobra.ExactArgs(3),
@@ -36,12 +43,25 @@ var enforceCmd = &cobra.Command{
 		if err != nil {
 			panic(err)
 		}
-		res, _ := e.Enforce(subject, object, action)
-		if res {
-			cmd.Println("Allowed")
-		} else {
-			cmd.Println("Denied")
+
+		res, explain, err := e.EnforceEx(subject, object, action)
+		if err != nil {
+			cmd.PrintErrf("Error during enforcement: %v\n", err)
+			return
 		}
+
+		response := ResponseBody{
+			Allow:   res,
+			Explain: explain,
+		}
+
+		jsonResponse, err := json.MarshalIndent(response, "", "    ")
+		if err != nil {
+			cmd.PrintErrf("Error marshaling JSON: %v\n", err)
+			return
+		}
+
+		cmd.Println(string(jsonResponse))
 	},
 }
 
