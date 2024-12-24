@@ -18,7 +18,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func Test_enforceCmd(t *testing.T) {
@@ -75,13 +75,13 @@ func Test_enforceCmd(t *testing.T) {
 	for _, tt := range tests {
 		cmd := rootCmd
 		output, err := executeCommand(cmd, append(basicArgs, tt.args...)...)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		var actual map[string]interface{}
 		err = json.Unmarshal([]byte(output), &actual)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
-		assert.Equal(t, tt.expected["allow"], actual["allow"])
-		assert.Equal(t, tt.expected["explain"], actual["explain"])
+		require.Equal(t, tt.expected["allow"], actual["allow"])
+		require.Equal(t, tt.expected["explain"], actual["explain"])
 	}
 }
