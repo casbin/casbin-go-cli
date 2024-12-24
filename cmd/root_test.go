@@ -16,20 +16,8 @@ package cmd
 
 import (
 	"bytes"
-	"testing"
-
 	"github.com/spf13/cobra"
 )
-
-func assertExecuteCommand(t *testing.T, root *cobra.Command, expected string, args ...string) {
-	output, err := executeCommand(root, args...)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if output != expected {
-		t.Fatalf("Expected %s, got %s", expected, output)
-	}
-}
 
 func executeCommand(root *cobra.Command, args ...string) (output string, err error) {
 	_, output, err = executeCommandC(root, args...)
