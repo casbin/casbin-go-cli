@@ -26,8 +26,8 @@ type ResponseBody struct {
 	Explain []string `json:"explain"`
 }
 
-// enforceCmd represents the enforce command.
-var enforceCmd = &cobra.Command{
+// enforceExCmd represents the enforceEx command.
+var enforceExCmd = &cobra.Command{
 	Use:   "enforceEx",
 	Short: "Test if a 'subject' can access a 'object' with a given 'action' based on the policy",
 	Long:  `Test if a 'subject' can access a 'object' with a given 'action' based on the policy`,
@@ -65,8 +65,53 @@ var enforceCmd = &cobra.Command{
 	},
 }
 
+// enforceCmd represents the enforce command.
+var enforceCmd = &cobra.Command{
+	Use:   "enforce",
+	Short: "Test if a 'subject' can access a 'object' with a given 'action' based on the policy",
+	Long:  `Test if a 'subject' can access a 'object' with a given 'action' based on the policy`,
+	Args:  cobra.ExactArgs(3),
+	Run: func(cmd *cobra.Command, args []string) {
+		modelPath, _ := cmd.Flags().GetString("model")
+		policyPath, _ := cmd.Flags().GetString("policy")
+		subject := args[0]
+		object := args[1]
+		action := args[2]
+
+		e, err := casbin.NewEnforcer(modelPath, policyPath)
+		if err != nil {
+			panic(err)
+		}
+
+		res, err := e.Enforce(subject, object, action)
+		if err != nil {
+			cmd.PrintErrf("Error during enforcement: %v\n", err)
+			return
+		}
+
+		response := ResponseBody{
+			Allow:   res,
+			Explain: []string{},
+		}
+
+		jsonResponse, err := json.MarshalIndent(response, "", "  ")
+		if err != nil {
+			cmd.PrintErrf("Error marshaling response: %v\n", err)
+			return
+		}
+
+		cmd.Println(string(jsonResponse))
+	},
+}
+
 func init() {
+	rootCmd.AddCommand(enforceExCmd)
 	rootCmd.AddCommand(enforceCmd)
+
+	enforceExCmd.Flags().StringP("model", "m", "", "Path to the model file")
+	_ = enforceExCmd.MarkFlagRequired("model")
+	enforceExCmd.Flags().StringP("policy", "p", "", "Path to the policy file")
+	_ = enforceExCmd.MarkFlagRequired("policy")
 
 	enforceCmd.Flags().StringP("model", "m", "", "Path to the model file")
 	_ = enforceCmd.MarkFlagRequired("model")
