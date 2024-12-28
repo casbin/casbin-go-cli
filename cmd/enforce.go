@@ -55,7 +55,7 @@ var enforceExCmd = &cobra.Command{
 			Explain: explain,
 		}
 
-		jsonResponse, err := json.MarshalIndent(response, "", "    ")
+		jsonResponse, err := json.Marshal(response)
 		if err != nil {
 			cmd.PrintErrf("Error marshaling JSON: %v\n", err)
 			return
@@ -94,7 +94,7 @@ var enforceCmd = &cobra.Command{
 			Explain: []string{},
 		}
 
-		jsonResponse, err := json.MarshalIndent(response, "", "  ")
+		jsonResponse, err := json.Marshal(response)
 		if err != nil {
 			cmd.PrintErrf("Error marshaling response: %v\n", err)
 			return

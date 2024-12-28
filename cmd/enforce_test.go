@@ -15,138 +15,25 @@
 package cmd
 
 import (
-	"encoding/json"
 	"testing"
-
-	"github.com/stretchr/testify/require"
 )
-
-func Test_enforceExCmd(t *testing.T) {
-	basicArgs := []string{"enforceEx", "-m", "../test/basic_model.conf", "-p", "../test/basic_policy.csv"}
-
-	tests := []struct {
-		args     []string
-		expected map[string]interface{}
-	}{
-		{
-			args: []string{"alice", "data1", "read"},
-			expected: map[string]interface{}{
-				"allow":   true,
-				"explain": []interface{}{"alice", "data1", "read"},
-			},
-		},
-		{
-			args: []string{"alice", "data1", "write"},
-			expected: map[string]interface{}{
-				"allow":   false,
-				"explain": []interface{}{},
-			},
-		},
-		{
-			args: []string{"alice", "data2", "read"},
-			expected: map[string]interface{}{
-				"allow":   false,
-				"explain": []interface{}{},
-			},
-		},
-		{
-			args: []string{"alice", "data2", "write"},
-			expected: map[string]interface{}{
-				"allow":   false,
-				"explain": []interface{}{},
-			},
-		},
-		{
-			args: []string{"bob", "data2", "write"},
-			expected: map[string]interface{}{
-				"allow":   true,
-				"explain": []interface{}{"bob", "data2", "write"},
-			},
-		},
-		{
-			args: []string{"bob", "data2", "read"},
-			expected: map[string]interface{}{
-				"allow":   false,
-				"explain": []interface{}{},
-			},
-		},
-	}
-
-	for _, tt := range tests {
-		cmd := rootCmd
-		output, err := executeCommand(cmd, append(basicArgs, tt.args...)...)
-		require.NoError(t, err)
-
-		var actual map[string]interface{}
-		err = json.Unmarshal([]byte(output), &actual)
-		require.NoError(t, err)
-
-		require.Equal(t, tt.expected["allow"], actual["allow"])
-		require.Equal(t, tt.expected["explain"], actual["explain"])
-	}
-}
 
 func Test_enforceCmd(t *testing.T) {
 	basicArgs := []string{"enforce", "-m", "../test/basic_model.conf", "-p", "../test/basic_policy.csv"}
+	assertExecuteCommand(t, rootCmd, "{\"allow\":true,\"explain\":[]}\n", append(basicArgs, "alice", "data1", "read")...)
+	assertExecuteCommand(t, rootCmd, "{\"allow\":false,\"explain\":[]}\n", append(basicArgs, "alice", "data1", "write")...)
+	assertExecuteCommand(t, rootCmd, "{\"allow\":false,\"explain\":[]}\n", append(basicArgs, "alice", "data2", "read")...)
+	assertExecuteCommand(t, rootCmd, "{\"allow\":false,\"explain\":[]}\n", append(basicArgs, "alice", "data2", "write")...)
+	assertExecuteCommand(t, rootCmd, "{\"allow\":true,\"explain\":[]}\n", append(basicArgs, "bob", "data2", "write")...)
+	assertExecuteCommand(t, rootCmd, "{\"allow\":false,\"explain\":[]}\n", append(basicArgs, "bob", "data2", "read")...)
+}
 
-	tests := []struct {
-		args     []string
-		expected map[string]interface{}
-	}{
-		{
-			args: []string{"alice", "data1", "read"},
-			expected: map[string]interface{}{
-				"allow":   true,
-				"explain": []interface{}{},
-			},
-		},
-		{
-			args: []string{"alice", "data1", "write"},
-			expected: map[string]interface{}{
-				"allow":   false,
-				"explain": []interface{}{},
-			},
-		},
-		{
-			args: []string{"alice", "data2", "read"},
-			expected: map[string]interface{}{
-				"allow":   false,
-				"explain": []interface{}{},
-			},
-		},
-		{
-			args: []string{"alice", "data2", "write"},
-			expected: map[string]interface{}{
-				"allow":   false,
-				"explain": []interface{}{},
-			},
-		},
-		{
-			args: []string{"bob", "data2", "write"},
-			expected: map[string]interface{}{
-				"allow":   true,
-				"explain": []interface{}{},
-			},
-		},
-		{
-			args: []string{"bob", "data2", "read"},
-			expected: map[string]interface{}{
-				"allow":   false,
-				"explain": []interface{}{},
-			},
-		},
-	}
-
-	for _, tt := range tests {
-		cmd := rootCmd
-		output, err := executeCommand(cmd, append(basicArgs, tt.args...)...)
-		require.NoError(t, err)
-
-		var actual map[string]interface{}
-		err = json.Unmarshal([]byte(output), &actual)
-		require.NoError(t, err)
-
-		require.Equal(t, tt.expected["allow"], actual["allow"])
-		require.Equal(t, tt.expected["explain"], actual["explain"])
-	}
+func Test_enforceExCmd(t *testing.T) {
+	basicArgs := []string{"enforceEx", "-m", "../test/basic_model.conf", "-p", "../test/basic_policy.csv"}
+	assertExecuteCommand(t, rootCmd, "{\"allow\":true,\"explain\":[\"alice\",\"data1\",\"read\"]}\n", append(basicArgs, "alice", "data1", "read")...)
+	assertExecuteCommand(t, rootCmd, "{\"allow\":false,\"explain\":[]}\n", append(basicArgs, "alice", "data1", "write")...)
+	assertExecuteCommand(t, rootCmd, "{\"allow\":false,\"explain\":[]}\n", append(basicArgs, "alice", "data2", "read")...)
+	assertExecuteCommand(t, rootCmd, "{\"allow\":false,\"explain\":[]}\n", append(basicArgs, "alice", "data2", "write")...)
+	assertExecuteCommand(t, rootCmd, "{\"allow\":true,\"explain\":[\"bob\",\"data2\",\"write\"]}\n", append(basicArgs, "bob", "data2", "write")...)
+	assertExecuteCommand(t, rootCmd, "{\"allow\":false,\"explain\":[]}\n", append(basicArgs, "bob", "data2", "read")...)
 }
