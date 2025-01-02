@@ -26,6 +26,9 @@ func Test_enforceCmd(t *testing.T) {
 	assertExecuteCommand(t, rootCmd, "{\"allow\":false,\"explain\":[]}\n", append(basicArgs, "alice", "data2", "write")...)
 	assertExecuteCommand(t, rootCmd, "{\"allow\":true,\"explain\":[]}\n", append(basicArgs, "bob", "data2", "write")...)
 	assertExecuteCommand(t, rootCmd, "{\"allow\":false,\"explain\":[]}\n", append(basicArgs, "bob", "data2", "read")...)
+
+	domainArgs := []string{"enforce", "-m", "../test/rbac_with_domains_model.conf", "-p", "../test/rbac_with_domains_policy.csv"}
+	assertExecuteCommand(t, rootCmd, "{\"allow\":true,\"explain\":[]}\n", append(domainArgs, "alice", "domain1", "data1", "read")...)
 }
 
 func Test_enforceExCmd(t *testing.T) {
@@ -36,4 +39,7 @@ func Test_enforceExCmd(t *testing.T) {
 	assertExecuteCommand(t, rootCmd, "{\"allow\":false,\"explain\":[]}\n", append(basicArgs, "alice", "data2", "write")...)
 	assertExecuteCommand(t, rootCmd, "{\"allow\":true,\"explain\":[\"bob\",\"data2\",\"write\"]}\n", append(basicArgs, "bob", "data2", "write")...)
 	assertExecuteCommand(t, rootCmd, "{\"allow\":false,\"explain\":[]}\n", append(basicArgs, "bob", "data2", "read")...)
+
+	domainArgs := []string{"enforceEx", "-m", "../test/rbac_with_domains_model.conf", "-p", "../test/rbac_with_domains_policy.csv"}
+	assertExecuteCommand(t, rootCmd, "{\"allow\":true,\"explain\":[\"admin\",\"domain1\",\"data1\",\"read\"]}\n", append(domainArgs, "alice", "domain1", "data1", "read")...)
 }

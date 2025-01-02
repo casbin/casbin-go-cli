@@ -31,20 +31,21 @@ var enforceExCmd = &cobra.Command{
 	Use:   "enforceEx",
 	Short: "Test if a 'subject' can access a 'object' with a given 'action' based on the policy",
 	Long:  `Test if a 'subject' can access a 'object' with a given 'action' based on the policy`,
-	Args:  cobra.ExactArgs(3),
 	Run: func(cmd *cobra.Command, args []string) {
 		modelPath, _ := cmd.Flags().GetString("model")
 		policyPath, _ := cmd.Flags().GetString("policy")
-		subject := args[0]
-		object := args[1]
-		action := args[2]
 
 		e, err := casbin.NewEnforcer(modelPath, policyPath)
 		if err != nil {
 			panic(err)
 		}
 
-		res, explain, err := e.EnforceEx(subject, object, action)
+		params := make([]interface{}, len(args))
+		for i, v := range args {
+			params[i] = v
+		}
+
+		res, explain, err := e.EnforceEx(params...)
 		if err != nil {
 			cmd.PrintErrf("Error during enforcement: %v\n", err)
 			return
@@ -70,20 +71,21 @@ var enforceCmd = &cobra.Command{
 	Use:   "enforce",
 	Short: "Test if a 'subject' can access a 'object' with a given 'action' based on the policy",
 	Long:  `Test if a 'subject' can access a 'object' with a given 'action' based on the policy`,
-	Args:  cobra.ExactArgs(3),
 	Run: func(cmd *cobra.Command, args []string) {
 		modelPath, _ := cmd.Flags().GetString("model")
 		policyPath, _ := cmd.Flags().GetString("policy")
-		subject := args[0]
-		object := args[1]
-		action := args[2]
 
 		e, err := casbin.NewEnforcer(modelPath, policyPath)
 		if err != nil {
 			panic(err)
 		}
 
-		res, err := e.Enforce(subject, object, action)
+		params := make([]interface{}, len(args))
+		for i, v := range args {
+			params[i] = v
+		}
+
+		res, err := e.Enforce(params...)
 		if err != nil {
 			cmd.PrintErrf("Error during enforcement: %v\n", err)
 			return
