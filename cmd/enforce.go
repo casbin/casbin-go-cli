@@ -99,21 +99,21 @@ func executeEnforce(cmd *cobra.Command, args []string, isEnforceEx bool) {
 	}
 }
 
-// enforceCmd represents the enforce command
+// enforceCmd represents the enforce command.
 var enforceCmd = &cobra.Command{
 	Use:   "enforce",
-	Short: "Test if a 'subject' can access a 'object' with a given 'action' based on the policy",
-	Long:  `Test if a 'subject' can access a 'object' with a given 'action' based on the policy`,
+	Short: "Test if a 'subject' can access a 'object' with a given 'action' based on the policy.",
+	Long:  `Test if a 'subject' can access a 'object' with a given 'action' based on the policy.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		executeEnforce(cmd, args, false)
 	},
 }
 
-// enforceExCmd represents the enforceEx command
+// enforceExCmd represents the enforceEx command.
 var enforceExCmd = &cobra.Command{
 	Use:   "enforceEx",
-	Short: "Test if a 'subject' can access a 'object' with a given 'action' based on the policy",
-	Long:  `Test if a 'subject' can access a 'object' with a given 'action' based on the policy`,
+	Short: "Test if a 'subject' can access a 'object' with a given 'action' based on the policy.",
+	Long:  `Test if a 'subject' can access a 'object' with a given 'action' based on the policy.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		executeEnforce(cmd, args, true)
 	},
@@ -123,13 +123,13 @@ func init() {
 	rootCmd.AddCommand(enforceExCmd)
 	rootCmd.AddCommand(enforceCmd)
 
-	enforceExCmd.Flags().StringP("model", "m", "", "Path to the model file")
+	enforceExCmd.Flags().StringP("model", "m", "", "Path to the model file.")
 	_ = enforceExCmd.MarkFlagRequired("model")
-	enforceExCmd.Flags().StringP("policy", "p", "", "Path to the policy file")
+	enforceExCmd.Flags().StringP("policy", "p", "", "Path to the policy file.")
 	_ = enforceExCmd.MarkFlagRequired("policy")
 
-	enforceCmd.Flags().StringP("model", "m", "", "Path to the model file")
+	enforceCmd.Flags().StringP("model", "m", "", "Path to the model file.")
 	_ = enforceCmd.MarkFlagRequired("model")
-	enforceCmd.Flags().StringP("policy", "p", "", "Path to the policy file")
+	enforceCmd.Flags().StringP("policy", "p", "", "Path to the policy file.")
 	_ = enforceCmd.MarkFlagRequired("policy")
 }
