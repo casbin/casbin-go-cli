@@ -5,6 +5,7 @@ go 1.19
 require (
 	github.com/casbin/casbin/v2 v2.97.0
 	github.com/spf13/cobra v1.8.1
+	golang.org/x/text v0.3.0
 )
 
 require (

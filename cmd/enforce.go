@@ -19,10 +19,11 @@ import (
 	"reflect"
 	"regexp"
 	"strconv"
-	"strings"
 
 	"github.com/casbin/casbin/v2"
 	"github.com/spf13/cobra"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 type ResponseBody struct {
@@ -30,7 +31,7 @@ type ResponseBody struct {
 	Explain []string `json:"explain"`
 }
 
-// Function to handle enforcement results
+// Function to handle enforcement results.
 func handleEnforceResult(cmd *cobra.Command, res bool, explain []string, err error) {
 	if err != nil {
 		cmd.PrintErrf("Error during enforcement: %v\n", err)
@@ -47,7 +48,7 @@ func handleEnforceResult(cmd *cobra.Command, res bool, explain []string, err err
 	encoder.Encode(response)
 }
 
-// Function to parse parameters and execute policy check
+// Function to parse parameters and execute policy check.
 func executeEnforce(cmd *cobra.Command, args []string, isEnforceEx bool) {
 	modelPath, _ := cmd.Flags().GetString("model")
 	policyPath, _ := cmd.Flags().GetString("policy")
@@ -57,27 +58,28 @@ func executeEnforce(cmd *cobra.Command, args []string, isEnforceEx bool) {
 		panic(err)
 	}
 
-	// Define regex pattern to match format like {field: value}
+	// Define regex pattern to match format like {field: value}.
 	paramRegex := regexp.MustCompile(`{\s*"?(\w+)"?\s*:\s*(\d+)\s*}`)
 
 	params := make([]interface{}, len(args))
 	for i, v := range args {
-		// Using regex pattern to match parameters
+		// Using regex pattern to match parameters.
 		if matches := paramRegex.FindStringSubmatch(v); len(matches) == 3 {
 			fieldName := matches[1]
 			valueStr := matches[2]
 
-			// Convert value to integer
+			// Convert value to integer.
 			if val, err := strconv.Atoi(valueStr); err == nil {
-				// Dynamically create struct type
+				// Dynamically create struct type.
+				caser := cases.Title(language.English)
 				structType := reflect.StructOf([]reflect.StructField{
 					{
-						Name: strings.Title(fieldName),
+						Name: caser.String(fieldName),
 						Type: reflect.TypeOf(0),
 					},
 				})
 
-				// Create struct instance and set value
+				// Create struct instance and set value.
 				structValue := reflect.New(structType).Elem()
 				structValue.Field(0).SetInt(int64(val))
 
