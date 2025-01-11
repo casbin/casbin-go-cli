@@ -48,6 +48,21 @@ func handleEnforceResult(cmd *cobra.Command, res bool, explain []string, err err
 	encoder.Encode(response)
 }
 
+// createStructWithValue creates a struct with a single field and value.
+func createStructWithValue(fieldName string, value interface{}) interface{} {
+	caser := cases.Title(language.English)
+	structType := reflect.StructOf([]reflect.StructField{
+		{
+			Name: caser.String(fieldName),
+			Type: reflect.TypeOf(value),
+		},
+	})
+
+	structValue := reflect.New(structType).Elem()
+	structValue.Field(0).Set(reflect.ValueOf(value))
+	return structValue.Interface()
+}
+
 // Function to parse parameters and execute policy check.
 func executeEnforce(cmd *cobra.Command, args []string, isEnforceEx bool) {
 	modelPath, _ := cmd.Flags().GetString("model")
@@ -58,8 +73,8 @@ func executeEnforce(cmd *cobra.Command, args []string, isEnforceEx bool) {
 		panic(err)
 	}
 
-	// Define regex pattern to match format like {field: value}.
-	paramRegex := regexp.MustCompile(`{\s*"?(\w+)"?\s*:\s*(\d+)\s*}`)
+	// Define regex pattern to match format like {field: value} or {field: "value"}.
+	paramRegex := regexp.MustCompile(`{\s*"?(\w+)"?\s*:\s*(?:"?([^"{}]+)"?)\s*}`)
 
 	params := make([]interface{}, len(args))
 	for i, v := range args {
@@ -68,24 +83,13 @@ func executeEnforce(cmd *cobra.Command, args []string, isEnforceEx bool) {
 			fieldName := matches[1]
 			valueStr := matches[2]
 
-			// Convert value to integer.
+			// Try to convert value to integer first.
 			if val, err := strconv.Atoi(valueStr); err == nil {
-				// Dynamically create struct type.
-				caser := cases.Title(language.English)
-				structType := reflect.StructOf([]reflect.StructField{
-					{
-						Name: caser.String(fieldName),
-						Type: reflect.TypeOf(0),
-					},
-				})
-
-				// Create struct instance and set value.
-				structValue := reflect.New(structType).Elem()
-				structValue.Field(0).SetInt(int64(val))
-
-				params[i] = structValue.Interface()
-				continue
+				params[i] = createStructWithValue(fieldName, val)
+			} else {
+				params[i] = createStructWithValue(fieldName, valueStr)
 			}
+			continue
 		}
 		params[i] = v
 	}

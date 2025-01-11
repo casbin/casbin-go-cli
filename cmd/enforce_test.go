@@ -47,4 +47,8 @@ func Test_enforceExCmd(t *testing.T) {
 	abacArgs := []string{"enforceEx", "-m", "../test/abac_rule_model.conf", "-p", "../test/abac_rule_policy.csv"}
 	assertExecuteCommand(t, rootCmd, "{\"allow\":true,\"explain\":[\"r.sub.Age > 18\",\"/data1\",\"read\"]}\n", append(abacArgs, "{\"Age\":30}", "/data1", "read")...)
 	assertExecuteCommand(t, rootCmd, "{\"allow\":false,\"explain\":[]}\n", append(abacArgs, "{\"Age\":15}", "/data1", "read")...)
+
+	abacArgs = []string{"enforceEx", "-m", "../test/abac_model.conf", "-p", "../test/abac_policy.csv"}
+	assertExecuteCommand(t, rootCmd, "{\"allow\":true,\"explain\":[]}\n", append(abacArgs, "alice", "{\"Owner\":\"alice\"}")...)
+	assertExecuteCommand(t, rootCmd, "{\"allow\":false,\"explain\":[]}\n", append(abacArgs, "alice", "{\"Owner\":\"bob\"}")...)
 }
