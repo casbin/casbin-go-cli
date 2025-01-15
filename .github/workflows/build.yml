@@ -44,6 +44,12 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
 
+      - name: Get Casbin version from go.mod
+        id: go-mod-version
+        run: |
+          version=$(go list -m -json github.com/casbin/casbin/v2 | jq -r .Version)
+          echo "version=$version" >> $GITHUB_OUTPUT
+
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v6
         with:
@@ -52,3 +58,4 @@ jobs:
           args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CASBIN_VERSION: ${{ steps.go-mod-version.outputs.version }}
