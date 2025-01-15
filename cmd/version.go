@@ -31,8 +31,8 @@ func init() {
 	oldRun := rootCmd.Run
 	rootCmd.Run = func(cmd *cobra.Command, args []string) {
 		if v, _ := cmd.Flags().GetBool("version"); v {
-			fmt.Printf("casbin-go-cli version: %s\n", Version)
-			fmt.Printf("casbin version: %s\n", CasbinVersion)
+			fmt.Printf("casbin-go-cli %s\n", Version)
+			fmt.Printf("casbin %s\n", CasbinVersion)
 			return
 		}
 		if oldRun != nil {
