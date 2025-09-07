@@ -43,9 +43,13 @@ func handleEnforceResult(cmd *cobra.Command, res bool, explain []string, err err
 		Explain: explain,
 	}
 
+	// Use JSON encoder with HTML escaping disabled to match Rust behavior
 	encoder := json.NewEncoder(cmd.OutOrStdout())
 	encoder.SetEscapeHTML(false)
-	encoder.Encode(response)
+	if err := encoder.Encode(response); err != nil {
+		cmd.PrintErrf("Error marshaling response: %v\n", err)
+		return
+	}
 }
 
 // createStructWithValue creates a struct with a single field and value.
@@ -78,7 +82,14 @@ func executeEnforce(cmd *cobra.Command, args []string, isEnforceEx bool) {
 
 	params := make([]interface{}, len(args))
 	for i, v := range args {
-		// Using regex pattern to match parameters.
+		// First try to parse as JSON (like Rust version)
+		var jsonValue interface{}
+		if err := json.Unmarshal([]byte(v), &jsonValue); err == nil {
+			params[i] = jsonValue
+			continue
+		}
+
+		// Then try regex pattern to match format like {field: value} or {field: "value"}
 		if matches := paramRegex.FindStringSubmatch(v); len(matches) == 3 {
 			fieldName := matches[1]
 			valueStr := matches[2]
@@ -91,6 +102,8 @@ func executeEnforce(cmd *cobra.Command, args []string, isEnforceEx bool) {
 			}
 			continue
 		}
+
+		// Fall back to string
 		params[i] = v
 	}
 
